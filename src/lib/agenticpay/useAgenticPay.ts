@@ -190,7 +190,6 @@ export function useAgenticPay() {
             "ok",
           );
         }
-        }
       } else {
         log("No matching items found in catalog for this criteria.", "warn");
       }
