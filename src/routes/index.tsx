@@ -98,7 +98,7 @@ function Index() {
       {/* Footer */}
       <footer className="border-t border-border/60 bg-surface/30 py-4 text-center text-xs text-muted-foreground">
         <p>
-          Spark-Agent-Pay · Built for <strong>Razorpay AI Buildathon 2026</strong> (Track 01: AI Growth &amp; Agentic Commerce)
+          Spark-Agent-Pay · Autonomous AI Commerce &amp; Payment Gateway (NPCI UAP / ACP)
         </p>
       </footer>
     </div>

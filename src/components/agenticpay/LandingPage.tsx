@@ -35,7 +35,7 @@ export function LandingPage({
       <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-b from-primary/10 via-surface/40 to-background p-8 md:p-14 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary mb-6">
           <Sparkles className="h-4 w-4" />
-          <span>Razorpay AI Buildathon 2026 · Track 01 Winner Architecture</span>
+          <span>Autonomous Commerce Protocol (ACP) &amp; NPCI-UAP Gateway</span>
         </div>
 
         <h1 className="mx-auto max-w-4xl text-3xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-foreground">
@@ -99,7 +99,7 @@ export function LandingPage({
             Engineered for the 2026 Agentic Commerce Standard
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Built to satisfy every requirement of the Razorpay AI Buildathon.
+            Autonomous agent transactions with bounded financial safety.
           </p>
         </div>
 
