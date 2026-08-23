@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Header } from "@/components/agenticpay/Header";
+import { Header, NavTab } from "@/components/agenticpay/Header";
+import { LandingPage } from "@/components/agenticpay/LandingPage";
 import { AgentPanel } from "@/components/agenticpay/AgentPanel";
 import { MerchantPanel } from "@/components/agenticpay/MerchantPanel";
 import { AuditPanel } from "@/components/agenticpay/AuditPanel";
+import { LedgerPanel } from "@/components/agenticpay/LedgerPanel";
+import { DocsPanel } from "@/components/agenticpay/DocsPanel";
 import { useAgenticPay } from "@/lib/agenticpay/useAgenticPay";
 
 export const Route = createFileRoute("/")({
@@ -28,44 +32,75 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const [activeTab, setActiveTab] = useState<NavTab>("home");
   const a = useAgenticPay();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Header sessionSpend={a.sessionSpend} backendLive={a.backendLive} />
-      <main className="mx-auto grid max-w-[1800px] gap-5 px-4 py-6 lg:grid-cols-3">
-        <AgentPanel
-          prompt={a.prompt}
-          setPrompt={a.setPrompt}
-          steps={a.steps}
-          running={a.running}
-          cart={a.cart}
-          subtotal={a.subtotal}
-          discount={a.discount}
-          total={a.total}
-          onRun={a.runAgent}
-        />
-        <MerchantPanel
-          catalog={a.catalog}
-          guardrails={a.guardrails}
-          setGuardrails={a.setGuardrails}
-          onAddProduct={a.handleAddProduct}
-          onUpdateStock={a.handleUpdateStock}
-        />
-        <AuditPanel
-          audit={a.audit}
-          total={a.total}
-          payable={a.payable}
-          paying={a.paying}
-          blocked={a.blocked}
-          needsApproval={a.needsApproval}
-          upiFallback={a.upiFallback}
-          onApprove={a.approveManually}
-          onPay={a.authorizeAndPay}
-          onDecline={a.simulateDecline}
-          onOutOfStock={a.simulateOutOfStock}
-        />
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <Header
+        sessionSpend={a.sessionSpend}
+        backendLive={a.backendLive}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+      />
+
+      <main className="mx-auto w-full max-w-[1800px] flex-1 px-4 py-6">
+        {activeTab === "home" && (
+          <LandingPage
+            onLaunchConsole={() => setActiveTab("console")}
+            sessionSpend={a.sessionSpend}
+            catalogCount={a.catalog.length}
+            backendLive={a.backendLive}
+          />
+        )}
+
+        {activeTab === "console" && (
+          <div className="grid gap-5 lg:grid-cols-3">
+            <AgentPanel
+              prompt={a.prompt}
+              setPrompt={a.setPrompt}
+              steps={a.steps}
+              running={a.running}
+              cart={a.cart}
+              subtotal={a.subtotal}
+              discount={a.discount}
+              total={a.total}
+              onRun={a.runAgent}
+            />
+            <MerchantPanel
+              catalog={a.catalog}
+              guardrails={a.guardrails}
+              setGuardrails={a.setGuardrails}
+              onAddProduct={a.handleAddProduct}
+              onUpdateStock={a.handleUpdateStock}
+            />
+            <AuditPanel
+              audit={a.audit}
+              total={a.total}
+              payable={a.payable}
+              paying={a.paying}
+              blocked={a.blocked}
+              needsApproval={a.needsApproval}
+              upiFallback={a.upiFallback}
+              onApprove={a.approveManually}
+              onPay={a.authorizeAndPay}
+              onDecline={a.simulateDecline}
+              onOutOfStock={a.simulateOutOfStock}
+            />
+          </div>
+        )}
+
+        {activeTab === "ledger" && <LedgerPanel sessionSpend={a.sessionSpend} />}
+
+        {activeTab === "docs" && <DocsPanel />}
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border/60 bg-surface/30 py-4 text-center text-xs text-muted-foreground">
+        <p>
+          Spark-Agent-Pay · Built for <strong>Razorpay AI Buildathon 2026</strong> (Track 01: AI Growth &amp; Agentic Commerce)
+        </p>
+      </footer>
     </div>
   );
 }
