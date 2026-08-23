@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect width="32" height="32" rx="8" fill="#0A0D14"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" stroke="#10B981" stroke-opacity="0.3"/>
+  <path d="M17 4L8 16H16L15 28L24 16H16L17 4Z" fill="url(#spark_grad)" stroke="#10B981" stroke-width="1.5" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="spark_grad" x1="8" y1="4" x2="24" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10B981"/>
+      <stop offset="0.5" stop-color="#34D399"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+</svg>
