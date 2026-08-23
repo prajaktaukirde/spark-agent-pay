@@ -119,30 +119,38 @@ export async function shopWithAgent(
   } catch {
     // Deterministic client fallback
     const rnd = Math.random().toString(36).slice(2, 8);
+    const subtotal = MOCK_CATALOG[0].price + MOCK_CATALOG[1].price;
+    const discount = Math.round(subtotal * 0.05);
+    const total = subtotal - discount;
+    const isOver = total > guardrails.maxPerOrder;
+    const status = isOver ? (guardrails.autoApprove ? "BLOCKED" : "NEEDS_APPROVAL") : "SUCCESS";
+    const verdictStatus = isOver ? (guardrails.autoApprove ? "BLOCKED" : "NEEDS_HUMAN_APPROVAL") : "APPROVED";
+
     const mockRes: AgentShopResponse = {
       session_id: `sess_${rnd}`,
       intent: goal,
       steps: [
         { id: "s1", text: "Parsing shopping intent via MCP / UAP v1.0 ...", tone: "info", at: "12:00:00" },
-        { id: "s2", text: "Selected best matching workspace bundle from catalog", tone: "ok", at: "12:00:01" },
-        { id: "s3", text: "Applied 5% dynamic bundle discount", tone: "ok", at: "12:00:02" },
+        { id: "s2", text: "Selected matching bundle from catalog (2 items)", tone: "ok", at: "12:00:01" },
+        { id: "s3", text: `Applied 5% dynamic bundle discount → −₹${discount}`, tone: "ok", at: "12:00:02" },
       ],
       cart: [
         { item: MOCK_CATALOG[0], qty: 1 },
         { item: MOCK_CATALOG[1], qty: 1 },
       ],
-      subtotal: MOCK_CATALOG[0].price + MOCK_CATALOG[1].price,
-      discount: Math.round((MOCK_CATALOG[0].price + MOCK_CATALOG[1].price) * 0.05),
-      total: Math.round((MOCK_CATALOG[0].price + MOCK_CATALOG[1].price) * 0.95),
+      subtotal,
+      discount,
+      total,
       guardrail_verdict: {
-        status: "APPROVED",
-        total_amount: MOCK_CATALOG[0].price + MOCK_CATALOG[1].price,
-        discount_amount: Math.round((MOCK_CATALOG[0].price + MOCK_CATALOG[1].price) * 0.05),
-        final_amount: Math.round((MOCK_CATALOG[0].price + MOCK_CATALOG[1].price) * 0.95),
+        status: verdictStatus,
+        total_amount: subtotal,
+        discount_amount: discount,
+        final_amount: total,
         rule_results: [],
-        audit_message: "Policy verified",
+        rejection_reason: isOver ? `Budget bound exceeded: ₹${total.toLocaleString()} > ₹${guardrails.maxPerOrder.toLocaleString()} cap` : undefined,
+        audit_message: isOver ? `Order total ₹${total.toLocaleString()} exceeds cap ₹${guardrails.maxPerOrder.toLocaleString()}` : "Policy verified",
       },
-      status: "SUCCESS",
+      status,
     };
     return { result: mockRes, live: false };
   }

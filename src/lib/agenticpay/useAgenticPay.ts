@@ -141,38 +141,55 @@ export function useAgenticPay() {
           "info",
         );
 
-        if (result.status === "BLOCKED") {
-          addAudit(
-            "GUARDRAIL_CHECK",
-            "Budget bound exceeded",
-            `${inr(result.total)} > ${inr(guardrails.maxPerOrder)} cap ➔ BLOCKED`,
-            "failed",
-          );
-          setBlocked(
-            result.guardrail_verdict.rejection_reason ||
-              "Order blocked by per-order cap. Raise the cap or enable human-in-the-loop review.",
-          );
-        } else if (result.status === "NEEDS_APPROVAL") {
-          addAudit(
-            "GUARDRAIL_CHECK",
-            "Budget bound exceeded",
-            `${inr(result.total)} > ${inr(guardrails.maxPerOrder)} cap ➔ REQUIRES_APPROVAL`,
-            "failed",
-          );
-          addAudit(
-            "HUMAN_APPROVAL",
-            "Human-in-the-loop required",
-            "Awaiting merchant confirmation for out-of-bounds order",
-            "pending",
-          );
-          setNeedsApproval(true);
+        const isOverBudget = result.total > guardrails.maxPerOrder;
+
+        if (isOverBudget || result.status === "BLOCKED" || result.status === "NEEDS_APPROVAL") {
+          if (guardrails.autoApprove && !needsApproval) {
+            addAudit(
+              "GUARDRAIL_CHECK",
+              "Budget bound exceeded",
+              `${inr(result.total)} > ${inr(guardrails.maxPerOrder)} cap ➔ BLOCKED`,
+              "failed",
+            );
+            log(
+              `Guardrail breach: ${inr(result.total)} exceeds per-order cap ${inr(guardrails.maxPerOrder)}`,
+              "error",
+            );
+            setBlocked(
+              result.guardrail_verdict?.rejection_reason ||
+                `Order blocked by per-order cap: ${inr(result.total)} > ${inr(guardrails.maxPerOrder)}. Raise the cap or enable human-in-the-loop review.`,
+            );
+          } else {
+            addAudit(
+              "GUARDRAIL_CHECK",
+              "Budget bound exceeded",
+              `${inr(result.total)} > ${inr(guardrails.maxPerOrder)} cap ➔ REQUIRES_APPROVAL`,
+              "failed",
+            );
+            addAudit(
+              "HUMAN_APPROVAL",
+              "Human-in-the-loop required",
+              "Awaiting merchant confirmation for out-of-bounds order",
+              "pending",
+            );
+            log(
+              `Guardrail breach: ${inr(result.total)} exceeds cap ${inr(guardrails.maxPerOrder)}. Escalating to human-in-the-loop...`,
+              "warn",
+            );
+            setNeedsApproval(true);
+          }
         } else {
           addAudit(
             "GUARDRAIL_CHECK",
             "Budget bounded",
-            `${inr(result.total)} < ${inr(guardrails.maxPerOrder)} cap ➔ PASSED`,
+            `${inr(result.total)} ≤ ${inr(guardrails.maxPerOrder)} cap ➔ PASSED`,
             "passed",
           );
+          log(
+            `Budget bounded (${inr(result.total)} ≤ ${inr(guardrails.maxPerOrder)} cap) ➔ PASSED`,
+            "ok",
+          );
+        }
         }
       } else {
         log("No matching items found in catalog for this criteria.", "warn");
