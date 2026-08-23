@@ -63,19 +63,25 @@ export function useAgenticPay() {
 
   useEffect(() => {
     let alive = true;
-    (async () => {
+    const check = async () => {
       const live = await pingBackend();
-      const c = await fetchCatalog();
       if (!alive) return;
       setBackendLive(live);
-      setCatalog(c.items);
-    })();
+      if (live) {
+        const c = await fetchCatalog();
+        if (alive) setCatalog(c.items);
+      }
+    };
+
+    check();
+    const interval = setInterval(check, 3000);
     const s = document.createElement("script");
     s.src = "https://checkout.razorpay.com/v1/checkout.js";
     s.async = true;
     document.body.appendChild(s);
     return () => {
       alive = false;
+      clearInterval(interval);
     };
   }, []);
 
