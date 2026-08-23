@@ -1,0 +1,82 @@
+import type { CatalogItem } from "./types";
+
+export const MOCK_CATALOG: CatalogItem[] = [
+  {
+    id: "sku_kb_01",
+    name: "Aurora TKL Mechanical Keyboard",
+    price: 2499,
+    stock: 12,
+    category: "Electronics",
+    icon: "keyboard",
+    tags: ["hot-swap", "wireless"],
+  },
+  {
+    id: "sku_ms_01",
+    name: "Vector Ergonomic Mouse",
+    price: 1299,
+    stock: 8,
+    category: "Accessories",
+    icon: "mouse",
+    tags: ["ergonomic", "silent"],
+  },
+  {
+    id: "sku_ms_02",
+    name: "Vector Lite Mouse (Substitute)",
+    price: 999,
+    stock: 34,
+    category: "Accessories",
+    icon: "mouse",
+    tags: ["budget", "in-stock"],
+  },
+  {
+    id: "sku_pad_01",
+    name: "Desk Mat XL — Charcoal",
+    price: 699,
+    stock: 40,
+    category: "Accessories",
+    icon: "square",
+    tags: ["fast-delivery"],
+  },
+  {
+    id: "sku_mon_01",
+    name: "Lumen 27\" 4K Monitor",
+    price: 18999,
+    stock: 3,
+    category: "Electronics",
+    icon: "monitor",
+    tags: ["4k", "premium"],
+  },
+  {
+    id: "sku_hub_01",
+    name: "PortMax 7-in-1 USB-C Hub",
+    price: 1899,
+    stock: 21,
+    category: "Electronics",
+    icon: "usb",
+    tags: ["fast-delivery"],
+  },
+  {
+    id: "sku_sw_01",
+    name: "FocusOS Pro — 1yr License",
+    price: 1499,
+    stock: 999,
+    category: "Software",
+    icon: "package",
+    tags: ["instant", "license"],
+  },
+  {
+    id: "sku_hs_01",
+    name: "Nimbus ANC Headset",
+    price: 3299,
+    stock: 0,
+    category: "Electronics",
+    icon: "headphones",
+    tags: ["anc", "out-of-stock"],
+  },
+];
+
+export const PRESETS = [
+  { emoji: "🚀", label: "Dev Setup under ₹5,000", prompt: "Find me an ergonomic workspace bundle with a mechanical keyboard and mouse under ₹5,000" },
+  { emoji: "⚡", label: "Fastest Delivery Accessories", prompt: "Assemble the fastest-delivery accessories bundle available today" },
+  { emoji: "⚠️", label: "Over-Budget Test (Triggers Guardrail)", prompt: "Buy the Lumen 27\" 4K monitor with a hub and keyboard right now" },
+] as const;
