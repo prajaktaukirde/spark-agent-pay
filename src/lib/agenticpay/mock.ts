@@ -8,7 +8,7 @@ export const MOCK_CATALOG: CatalogItem[] = [
     stock: 12,
     category: "Electronics",
     icon: "keyboard",
-    tags: ["hot-swap", "wireless"],
+    tags: ["hot-swap", "wireless", "keyboard"],
   },
   {
     id: "sku_ms_01",
@@ -17,7 +17,7 @@ export const MOCK_CATALOG: CatalogItem[] = [
     stock: 8,
     category: "Accessories",
     icon: "mouse",
-    tags: ["ergonomic", "silent"],
+    tags: ["ergonomic", "silent", "mouse"],
   },
   {
     id: "sku_ms_02",
@@ -26,7 +26,7 @@ export const MOCK_CATALOG: CatalogItem[] = [
     stock: 34,
     category: "Accessories",
     icon: "mouse",
-    tags: ["budget", "in-stock"],
+    tags: ["budget", "in-stock", "mouse"],
   },
   {
     id: "sku_pad_01",
@@ -35,7 +35,7 @@ export const MOCK_CATALOG: CatalogItem[] = [
     stock: 40,
     category: "Accessories",
     icon: "square",
-    tags: ["fast-delivery"],
+    tags: ["fast-delivery", "desk-mat"],
   },
   {
     id: "sku_mon_01",
@@ -44,7 +44,7 @@ export const MOCK_CATALOG: CatalogItem[] = [
     stock: 3,
     category: "Electronics",
     icon: "monitor",
-    tags: ["4k", "premium"],
+    tags: ["4k", "premium", "screen"],
   },
   {
     id: "sku_hub_01",
@@ -53,7 +53,7 @@ export const MOCK_CATALOG: CatalogItem[] = [
     stock: 21,
     category: "Electronics",
     icon: "usb",
-    tags: ["fast-delivery"],
+    tags: ["fast-delivery", "hub"],
   },
   {
     id: "sku_sw_01",
@@ -62,7 +62,7 @@ export const MOCK_CATALOG: CatalogItem[] = [
     stock: 999,
     category: "Software",
     icon: "package",
-    tags: ["instant", "license"],
+    tags: ["instant", "license", "software"],
   },
   {
     id: "sku_hs_01",
@@ -71,12 +71,13 @@ export const MOCK_CATALOG: CatalogItem[] = [
     stock: 0,
     category: "Electronics",
     icon: "headphones",
-    tags: ["anc", "out-of-stock"],
+    tags: ["anc", "out-of-stock", "audio"],
   },
 ];
 
 export const PRESETS = [
   { emoji: "🚀", label: "Dev Setup under ₹5,000", prompt: "Find me an ergonomic workspace bundle with a mechanical keyboard and mouse under ₹5,000" },
-  { emoji: "⚡", label: "Fastest Delivery Accessories", prompt: "Assemble the fastest-delivery accessories bundle available today" },
+  { emoji: "💻", label: "Productivity Software & Mat", prompt: "I need a FocusOS software license and an XL desk mat for work" },
+  { emoji: "⚡", label: "Fastest Delivery Hub & Mat", prompt: "Assemble a fast-delivery USB-C hub and mouse pad bundle" },
   { emoji: "⚠️", label: "Over-Budget Test (Triggers Guardrail)", prompt: "Buy the Lumen 27\" 4K monitor with a hub and keyboard right now" },
 ] as const;

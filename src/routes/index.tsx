@@ -8,13 +8,13 @@ import { useAgenticPay } from "@/lib/agenticpay/useAgenticPay";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AgenticPay — Autonomous AI Commerce & Payment Gateway" },
+      { title: "Spark-Agent-Pay — Autonomous AI Commerce Gateway" },
       {
         name: "description",
         content:
-          "AgenticPay lets AI buyer agents discover catalogs, negotiate bundles, pass financial guardrails, and pay via Razorpay with a full audit trail.",
+          "Spark-Agent-Pay lets AI buyer agents discover catalogs, negotiate bundles, pass financial guardrails, and pay via Razorpay with a full audit trail.",
       },
-      { property: "og:title", content: "AgenticPay — Autonomous AI Commerce Gateway" },
+      { property: "og:title", content: "Spark-Agent-Pay — Autonomous AI Commerce Gateway" },
       {
         property: "og:description",
         content:
@@ -49,6 +49,8 @@ function Index() {
           catalog={a.catalog}
           guardrails={a.guardrails}
           setGuardrails={a.setGuardrails}
+          onAddProduct={a.handleAddProduct}
+          onUpdateStock={a.handleUpdateStock}
         />
         <AuditPanel
           audit={a.audit}

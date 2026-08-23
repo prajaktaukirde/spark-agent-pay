@@ -4,13 +4,21 @@ Track 01: AI Growth & Agentic Commerce (Razorpay AI Buildathon)
 """
 
 import os
+import time
 from typing import Dict, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-from catalog_data import get_all_catalog_items, get_item_by_id, CatalogItem
+from catalog_data import (
+    get_all_catalog_items,
+    get_item_by_id,
+    add_or_update_item,
+    update_item_stock,
+    decrement_inventory,
+    CatalogItem
+)
 from guardrails import evaluate_guardrails, GuardrailPolicy, CartItemPayload, GuardrailVerdict
 from razorpay_client import (
     create_razorpay_order,
@@ -40,6 +48,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# In-Memory Transaction Ledger
+TRANSACTION_LEDGER: List[Dict[str, Any]] = []
+
 # ----------------- Schemas ----------------- #
 
 class CreateOrderRequest(BaseModel):
@@ -53,6 +64,15 @@ class VerifySignatureRequest(BaseModel):
     payment_id: str
     signature: Optional[str] = None
     session_id: Optional[str] = None
+    items: Optional[List[Dict[str, Any]]] = None
+    total_inr: Optional[int] = None
+
+class StockUpdateRequest(BaseModel):
+    item_id: str
+    stock: int
+
+class DecrementCartRequest(BaseModel):
+    items: List[Dict[str, Any]]  # [{"id": "sku_...", "qty": 1}]
 
 # ----------------- Routes ----------------- #
 
@@ -80,14 +100,40 @@ def health_check():
 
 @app.get("/catalog", response_model=List[CatalogItem])
 def get_catalog():
-    """Returns real-time merchant catalog with stock and category tags."""
+    """Returns real-time merchant catalog with live stock and category tags."""
     return get_all_catalog_items()
+
+@app.post("/catalog/add", response_model=CatalogItem)
+def add_product(item: CatalogItem):
+    """Adds a new custom product SKU to the merchant catalog in real time."""
+    return add_or_update_item(item)
+
+@app.post("/catalog/stock", response_model=Optional[CatalogItem])
+def update_stock(req: StockUpdateRequest):
+    """Directly updates inventory count for an item."""
+    updated = update_item_stock(req.item_id, req.stock)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return updated
+
+@app.post("/catalog/decrement")
+def decrement_stock(req: DecrementCartRequest):
+    """Decrements inventory count after successful autonomous order."""
+    results = []
+    for line in req.items:
+        sku_id = line.get("id")
+        qty = line.get("qty", 1)
+        if sku_id:
+            updated = decrement_inventory(sku_id, qty)
+            if updated:
+                results.append({"id": sku_id, "remaining_stock": updated.stock})
+    return {"status": "success", "updated_items": results}
 
 @app.post("/agent/shop", response_model=AgentShoppingResponse)
 def agent_shopping_loop(req: ShoppingRequest):
     """
-    Executes the full autonomous buyer agent shopping loop with
-    intent parsing, catalog filtering, dynamic bundling, and guardrail checks.
+    Executes the autonomous buyer agent shopping loop with
+    intent parsing, dynamic bundling, Gemini LLM reasoning, and guardrail checks.
     """
     return run_buyer_agent(req)
 
@@ -119,13 +165,30 @@ def create_order(req: CreateOrderRequest):
 @app.post("/razorpay/verify")
 def verify_signature(req: VerifySignatureRequest):
     """
-    Verifies Razorpay HMAC-SHA256 payment signature.
+    Verifies Razorpay HMAC-SHA256 payment signature and logs to merchant transaction ledger.
     """
     is_valid = verify_payment_signature(
         order_id=req.order_id,
         payment_id=req.payment_id,
         signature=req.signature
     )
+
+    if is_valid:
+        # Decrement purchased item stock
+        if req.items:
+            for item in req.items:
+                decrement_inventory(item.get("id", ""), item.get("qty", 1))
+
+        # Record in Merchant Ledger
+        TRANSACTION_LEDGER.append({
+            "order_id": req.order_id,
+            "payment_id": req.payment_id,
+            "amount_inr": req.total_inr or 0,
+            "status": "CAPTURED",
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            "protocol": "NPCI-UAP/ACP",
+            "verified": True
+        })
 
     if req.session_id:
         audit_manager.log_event(
@@ -140,11 +203,16 @@ def verify_signature(req: VerifySignatureRequest):
                 session_id=req.session_id,
                 kind="PAYMENT_CAPTURED",
                 title="Payment captured",
-                detail="Transaction captured in Razorpay test mode",
+                detail=f"Transaction captured in Razorpay test mode · Ledger updated",
                 status="passed"
             )
 
     return {"verified": is_valid}
+
+@app.get("/orders/history")
+def get_order_history():
+    """Returns real merchant transaction ledger."""
+    return TRANSACTION_LEDGER
 
 @app.post("/guardrails/evaluate", response_model=GuardrailVerdict)
 def evaluate_order_guardrails(

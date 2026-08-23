@@ -12,11 +12,11 @@ class CatalogItem(BaseModel):
     price: int  # in INR (Rupees)
     stock: int
     category: str  # "Electronics" | "Accessories" | "Software"
-    icon: str
+    icon: str = "package"
     tags: List[str] = Field(default_factory=list)
     description: Optional[str] = None
 
-# Default Merchant Catalog
+# Default Dynamic Merchant Catalog
 MERCHANT_CATALOG: Dict[str, CatalogItem] = {
     "sku_kb_01": CatalogItem(
         id="sku_kb_01",
@@ -25,7 +25,7 @@ MERCHANT_CATALOG: Dict[str, CatalogItem] = {
         stock=12,
         category="Electronics",
         icon="keyboard",
-        tags=["hot-swap", "wireless", "rgb", "fast-delivery"],
+        tags=["hot-swap", "wireless", "rgb", "fast-delivery", "keyboard"],
         description="Compact 87-key wireless mechanical keyboard with hot-swappable switches and RGB backlighting."
     ),
     "sku_ms_01": CatalogItem(
@@ -35,7 +35,7 @@ MERCHANT_CATALOG: Dict[str, CatalogItem] = {
         stock=8,
         category="Accessories",
         icon="mouse",
-        tags=["ergonomic", "silent", "wireless"],
+        tags=["ergonomic", "silent", "wireless", "mouse"],
         description="Ergonomic vertical wireless mouse designed for wrist strain relief with silent switches."
     ),
     "sku_ms_02": CatalogItem(
@@ -45,7 +45,7 @@ MERCHANT_CATALOG: Dict[str, CatalogItem] = {
         stock=34,
         category="Accessories",
         icon="mouse",
-        tags=["budget", "in-stock", "fast-delivery"],
+        tags=["budget", "in-stock", "fast-delivery", "mouse"],
         description="Lightweight 6-button wireless mouse with 3200 DPI optical sensor."
     ),
     "sku_pad_01": CatalogItem(
@@ -55,7 +55,7 @@ MERCHANT_CATALOG: Dict[str, CatalogItem] = {
         stock=40,
         category="Accessories",
         icon="square",
-        tags=["fast-delivery", "microfiber"],
+        tags=["fast-delivery", "microfiber", "desk-mat"],
         description="900x400mm water-resistant microfiber desk pad with anti-fray stitched edges."
     ),
     "sku_mon_01": CatalogItem(
@@ -65,7 +65,7 @@ MERCHANT_CATALOG: Dict[str, CatalogItem] = {
         stock=3,
         category="Electronics",
         icon="monitor",
-        tags=["4k", "premium", "hdr", "ips"],
+        tags=["4k", "premium", "hdr", "ips", "screen", "monitor"],
         description="27-inch 4K UHD IPS display with 99% sRGB color gamut, USB-C 65W power delivery."
     ),
     "sku_hub_01": CatalogItem(
@@ -75,7 +75,7 @@ MERCHANT_CATALOG: Dict[str, CatalogItem] = {
         stock=21,
         category="Electronics",
         icon="usb",
-        tags=["fast-delivery", "4k-hdmi", "pd100w"],
+        tags=["fast-delivery", "4k-hdmi", "pd100w", "adapter", "hub"],
         description="Aluminium 7-in-1 USB-C hub with 4K HDMI, 100W PD pass-through, SD card reader, 3x USB 3.0."
     ),
     "sku_sw_01": CatalogItem(
@@ -85,7 +85,7 @@ MERCHANT_CATALOG: Dict[str, CatalogItem] = {
         stock=999,
         category="Software",
         icon="package",
-        tags=["instant", "license", "ai-productivity"],
+        tags=["instant", "license", "ai-productivity", "software"],
         description="1-year single-user enterprise productivity and automated workflow software license."
     ),
     "sku_hs_01": CatalogItem(
@@ -95,7 +95,7 @@ MERCHANT_CATALOG: Dict[str, CatalogItem] = {
         stock=0,
         category="Electronics",
         icon="headphones",
-        tags=["anc", "out-of-stock", "bluetooth-5.3"],
+        tags=["anc", "out-of-stock", "bluetooth-5.3", "headphone", "audio"],
         description="Active Noise Cancelling over-ear Bluetooth 5.3 headset with 40-hour battery life."
     )
 }
@@ -107,6 +107,26 @@ def get_all_catalog_items() -> List[CatalogItem]:
 def get_item_by_id(item_id: str) -> Optional[CatalogItem]:
     """Lookup an item by SKU ID."""
     return MERCHANT_CATALOG.get(item_id)
+
+def add_or_update_item(item: CatalogItem) -> CatalogItem:
+    """Adds a new item or updates an existing item in the catalog."""
+    MERCHANT_CATALOG[item.id] = item
+    return item
+
+def update_item_stock(item_id: str, stock: int) -> Optional[CatalogItem]:
+    """Updates inventory count for an item."""
+    if item_id in MERCHANT_CATALOG:
+        MERCHANT_CATALOG[item_id].stock = stock
+        return MERCHANT_CATALOG[item_id]
+    return None
+
+def decrement_inventory(item_id: str, qty: int = 1) -> Optional[CatalogItem]:
+    """Decrements stock after successful payment."""
+    if item_id in MERCHANT_CATALOG:
+        current = MERCHANT_CATALOG[item_id].stock
+        MERCHANT_CATALOG[item_id].stock = max(0, current - qty)
+        return MERCHANT_CATALOG[item_id]
+    return None
 
 def search_catalog(
     category_whitelist: Optional[List[str]] = None,
