@@ -147,4 +147,4 @@ Open `http://localhost:5173` in your browser.
 ---
 
 ## 🛡️ License
-MIT License. Built for the **Razorpay AI Buildathon 2026**.
+MIT License. Built for the **Razorpay AI Buildathon 2026** (Track 01: AI Growth & Agentic Commerce).
